@@ -1,7 +1,5 @@
-`include "uart_pkg.sv"
-import uart_pkg::*;
 
-module UART_RX #(
+module uart_rx #(
     parameter int DATA_WIDTH = 8,
     parameter int CLK_FREQ = 50000000, 
     parameter int BAUD_RATE = 19200
@@ -21,7 +19,7 @@ module UART_RX #(
         STOP   = 3'b011,
         DONE   = 3'b100
     } rx_state;
-    state rx_current, rx_next;
+    rx_state rx_current, rx_next;
 
     typedef struct {
         integer clk_div;
@@ -46,7 +44,7 @@ module UART_RX #(
 
     assign rx_data_out = rx_curr_config.data;
 
-    always @(*) begin
+    always_comb begin
         rx_next = rx_current;
         rx_next_config.clk_div = rx_curr_config.clk_div;
         rx_next_config.data = rx_curr_config.data;

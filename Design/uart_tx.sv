@@ -2,12 +2,12 @@
 module uart_tx #(
     parameter int DATA_WIDTH = 8,
     parameter CLK_FREQ = 50000000,
-    parameter BAUD_RATE = 19200,
+    parameter BAUD_RATE = 19200
 ) (
     input logic clk,
     input logic rst,
     input logic start,
-    input logic [DATA_WIDTH-1:0] tx_data,
+    input logic [DATA_WIDTH-1:0] tx_data_in,
     output logic tx,
     output logic tx_active,
     output logic done_tx
@@ -22,7 +22,7 @@ module uart_tx #(
         STOP   = 3'b011,
         DONE   = 3'b100
     } tx_state;
-    state tx_current, tx_next;
+    tx_state tx_current, tx_next;
 
     typedef struct {
         integer clk_div;
@@ -52,7 +52,7 @@ module uart_tx #(
         end
     end
 
-    always @(*) begin
+    always_comb begin
         tx_next = tx_current;
         tx_next_config.clk_div = tx_curr_config.clk_div;
         tx_out_next = tx_out;
