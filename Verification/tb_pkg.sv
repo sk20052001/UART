@@ -15,18 +15,4 @@ package tb_pkg;
         endfunction
     endclass
 
-    covergroup cg_uart(input logic clk, input bit [7:0] random_data, input logic tx_active);
-        coverpoint random_data {
-            bins low_values = {[0:63]};
-            bins mid_values = {[64:127]};
-            bins high_values = {[128:191]};
-            bins max_values = {[192:255]};
-        }
-        coverpoint tx_active {
-            bins tx_inactive = {0};
-            bins tx_active = {1};
-        }
-
-    endgroup: cg_uart
-
 endpackage

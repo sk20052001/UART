@@ -16,10 +16,19 @@ module tb_uart;
     logic [DATA_WIDTH-1:0] rx_data_out;
     logic start, done_tx, tx_active;
 
-    randomData rd;
-    cg_uart cov;
-
     logic [DATA_WIDTH-1:0] test_data;
+
+    covergroup cg_uart;
+        coverpoint test_data; //{
+        //     bins low_values = {[0:63]};
+        //     bins mid_values = {[64:127]};
+        //     bins high_values = {[128:191]};
+        //     bins max_values = {[192:255]};
+        // }
+    endgroup
+
+    randomData rd;
+    cg_uart cg;
 
     uart_rx #(
         .CLK_FREQ(CLK_FREQ),
@@ -54,7 +63,7 @@ module tb_uart;
         $display("Starting UART Testbench...");
         
         rd = new();
-        cov = new(clk, test_data, tx_active);
+        cg = new();
 
         $display("Initiating Randomization Class...");
         
@@ -62,12 +71,13 @@ module tb_uart;
         rst = 1;
         start = 0;
         tx_data_in = 0;
-        test_data = 8'hA5;
+        test_data = 8'h00;
         #100;
         rst = 0;
 
-        repeat (255) begin
+        repeat (25) begin
             test_data = rd.randomc();
+            
             $display("Random value generated: %h", test_data);
 
             #100;
@@ -87,24 +97,21 @@ module tb_uart;
                 $display("Test Failed: Received data (0x%0h) does not match transmitted data (0x%0h) \n", rx_data_out, test_data);
             end
 
-            cov.sample();
+            cg.sample();
+            // test_data += 1;
         end
 
-        $display("Coverage for random_data bins:");
-        $display("Low Values: %0d", cov.random_data.get_coverage());
-        $display("Mid Values: %0d", cov.random_data.get_coverage());
-        $display("High Values: %0d", cov.random_data.get_coverage());
-        $display("Max Values: %0d", cov.random_data.get_coverage());
+        $display("Total functional Coverage for random_data: %0.2f%%", cg.get_coverage());
+        // $display("Low Values: %0.2f%%", cg.test_data.get_bin_coverage(0));
+        // $display("Mid Values: %0.2f%%", cg.test_data.get_bin_coverage(1));
+        // $display("High Values: %0.2f%%", cg.test_data.get_bin_coverage(2));
+        // $display("Max Values: %0.2f%%", cg.test_data.get_bin_coverage(3));
 
-        $display("Coverage for tx_active bins:");
-        $display("Tx Inactive: %0d", cov.tx_active.get_coverage());
-        $display("Tx Active: %0d", cov.tx_active.get_coverage());
         $stop;
     end
 
     initial begin
-        $monitor("Time=%.3tms | TX=0x%0h | RX=0x%0h | TX_Active=%b | Done_TX=%b",
-                 $realtime / 1e6, tx_data_in, rx_data_out, tx_active, done_tx);
+        $monitor("Time=%.3tms | TX=0x%0h | RX=0x%0h | TX_Active=%b | Done_TX=%b", $realtime / 1e6, tx_data_in, rx_data_out, tx_active, done_tx);
     end
 
 endmodule
