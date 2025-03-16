@@ -1,11 +1,6 @@
 package tb_pkg;
-    class randomData;
-        rand bit [7:0] data;
-
-        constraint range_c {
-            data >= 8'h00;
-            data <= 8'hFF;
-        }
+    class randomData #(parameter int DATA_WIDTH = 8);
+        rand bit [DATA_WIDTH:0] data;
 
         function bit [7:0] randomc();
             if (!this.randomize()) begin
