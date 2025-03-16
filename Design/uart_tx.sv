@@ -7,21 +7,14 @@ module uart_tx #(
     input logic clk,
     input logic rst,
     input logic start,
-    input logic [DATA_WIDTH-1:0] tx_data_in,
+    input logic [DATA_WIDTH-1:0] tx_data,
     output logic tx,
-    output logic tx_active,
     output logic done_tx
 );
 
     localparam CLK_DIVIDE = (CLK_FREQ / BAUD_RATE);
 
-    typedef enum bit [2:0] {
-        IDLE   = 3'b000,
-        START  = 3'b001,
-        DATA   = 3'b010,
-        STOP   = 3'b011,
-        DONE   = 3'b100
-    } tx_state;
+    typedef enum logic [2:0] { IDLE, START, DATA, STOP, DONE } tx_state;
     tx_state tx_current, tx_next;
 
     typedef struct {
@@ -33,7 +26,6 @@ module uart_tx #(
 
     logic tx_out, tx_out_next;
 
-    assign tx_active = (tx_current == DATA);
     assign tx = tx_out;
 
     always_ff @(posedge clk) begin
@@ -66,7 +58,7 @@ module uart_tx #(
                 tx_next_config.clk_div = 0;
                 tx_next_config.index = 0;
                 if (start == 1) begin
-                    tx_next_config.data = tx_data_in;
+                    tx_next_config.data = tx_data;
                     tx_next = START;
                 end else begin
                     tx_next = IDLE;
