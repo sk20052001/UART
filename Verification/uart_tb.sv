@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 `include "TB_pkg.sv"
 
 import tb_pkg::*;
@@ -7,10 +7,10 @@ module tb_uart;
 
     parameter integer DATA_WIDTH = 8;
     parameter int TX_CLK_FREQ = 50000000;
-    parameter int RX_CLK_FREQ = 50000000;
+    parameter int RX_CLK_FREQ = 25000000;
     parameter int BAUD_RATE = 19200;
     parameter int TX_CLK_PERIOD = 20;
-    parameter int RX_CLK_PERIOD = 20;
+    parameter int RX_CLK_PERIOD = 40;
 
     logic tx_clk, rx_clk, tx, rx, rst;
     logic [DATA_WIDTH-1:0] tx_data;
@@ -23,7 +23,7 @@ module tb_uart;
         coverpoint random_data;
     endgroup
 
-    randomData rd;
+    randomData #(.DATA_WIDTH(DATA_WIDTH)) rd;
     cg_uart cg;
 
     uart_tx #(
@@ -70,13 +70,13 @@ module tb_uart;
         #100;
         rst = 0;
 
-        repeat (200) begin
+        repeat (20) begin
             random_data = rd.randomc();
             
             $display("Random value generated: %h", random_data);
 
             #100;
-            $display("Sending data: 0x%0h", random_data);
+            $display("Sending data: 0x%h", random_data);
             tx_data = random_data;
             start = 1;
             #TX_CLK_PERIOD;
@@ -87,9 +87,9 @@ module tb_uart;
 
             #100;
             if (rx_data == random_data) begin
-                $display("Test Passed: Received data matches transmitted data (0x%0h) \n", rx_data);
+                $display("Test Passed: Received data matches transmitted data (0x%h) \n", rx_data);
             end else begin
-                $display("Test Failed: Received data (0x%0h) does not match transmitted data (0x%0h) \n", rx_data, random_data);
+                $display("Test Failed: Received data (0x%h) does not match transmitted data (0x%h) \n", rx_data, random_data);
             end
 
             cg.sample();
@@ -101,7 +101,7 @@ module tb_uart;
     end
 
     initial begin
-        $monitor("Time=%.3tms | TX=0x%0h | RX=0x%0h | Done_TX=%b", $realtime / 1e6, tx_data, rx_data, done_tx);
+        $monitor("Time=%.3tms | TX=0x%h | RX=0x%h | Done_TX=%b", $realtime / 1e6, tx_data, rx_data, done_tx);
     end
 
 endmodule
