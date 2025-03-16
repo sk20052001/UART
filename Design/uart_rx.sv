@@ -7,18 +7,12 @@ module uart_rx #(
     input logic clk,
     input logic rst,
     input logic rx,
-    output logic [DATA_WIDTH-1:0] rx_data_out
+    output logic [DATA_WIDTH-1:0] rx_data
 );
 
     localparam CLK_DIVIDE = (CLK_FREQ / BAUD_RATE);
 
-    typedef enum bit [2:0] {
-        IDLE   = 3'b000,
-        START  = 3'b001,
-        DATA   = 3'b010,
-        STOP   = 3'b011,
-        DONE   = 3'b100
-    } rx_state;
+    typedef enum logic [2:0] { IDLE, START, DATA, STOP, DONE } rx_state;
     rx_state rx_current, rx_next;
 
     typedef struct {
@@ -42,7 +36,7 @@ module uart_rx #(
         end
     end
 
-    assign rx_data_out = rx_curr_config.data;
+    assign rx_data = rx_curr_config.data;
 
     always_comb begin
         rx_next = rx_current;
@@ -83,7 +77,7 @@ module uart_rx #(
                     rx_next_config.clk_div = 0;
                     rx_next_config.data[rx_curr_config.index] = rx;
                     if (rx_curr_config.index < (DATA_WIDTH - 1)) begin
-                        rx_next_config.index = rx_next_config.index + 1;
+                        rx_next_config.index = rx_curr_config.index + 1;
                         rx_next = DATA;
                     end else begin
                         rx_next_config.index = 0;
