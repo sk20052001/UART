@@ -70,7 +70,7 @@ module tb_uart;
         #100;
         rst = 0;
 
-        repeat (20) begin
+        repeat (50) begin
             random_data = rd.randomc();
             
             $display("Random value generated: %h", random_data);
